@@ -234,3 +234,44 @@ LIMIT 10;
 SELECT min(dt) FROM dataforce_sandbox.vb_parent_child_viewing
 WHERE app_type = 'bigscreen-html'
 LIMIT 10;
+
+
+
+---- Do parents with kids accounts still watch kids things?
+SELECT * FROM dataforce_sandbox.vb_parent_viewing LIMIT 10;
+SELECT * FROM dataforce_sandbox.vb_child_viewing LIMIT 10;
+SELECT * FROM dataforce_sandbox.vb_kids_hids LIMIT 10;
+
+--CREATE TABLE dataforce_sandbox.vb_adults_daily as
+
+with adult_daily_totals AS (
+    SELECT dt, hashed_id, sum(start_flag) as starts
+    FROM dataforce_sandbox.vb_parent_viewing
+    WHERE app_type = 'bigscreen-html'
+    GROUP BY 1, 2
+)
+SELECT dt, hashed_id, case when starts > 0 then 1 else 0 end as viewing
+from adult_daily_totals;
+
+
+GRANT ALL on dataforce_sandbox.vb_parent_viewing to group central_insights_server;
+GRANT ALL on dataforce_sandbox.vb_child_viewing to group central_insights_server;
+GRANT ALL on dataforce_sandbox.vb_kids_hids to group central_insights_server;
+
+
+with adult_daily_totals AS (
+    SELECT dt, hashed_id, sum(start_flag) as starts
+    FROM dataforce_sandbox.vb_parent_viewing
+    WHERE app_type = 'bigscreen-html'
+      and dt = '20210307'
+    GROUP BY 1, 2
+)
+SELECT dt, hashed_id, case when starts > 0 then 1 else 0 end as viewing
+from adult_daily_totals;
+
+SELECT distinct  parent, child, age FROM dataforce_sandbox.vb_kids_hids LIMIT 10;
+SELECT min(dt) from dataforce_sandbox.vb_child_viewing;
+
+
+------- In R we took all the adults and for every day gave them a 1 if they viewed anything from CBBC or Cbeeies
+SELECt * FROM central_insights_sandbox.vb_adult_viewing_daily LIMIT 10;
